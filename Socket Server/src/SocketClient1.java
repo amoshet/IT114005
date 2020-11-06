@@ -7,10 +7,10 @@ import java.net.UnknownHostException;
 import java.util.Scanner;
 
 //part 2
-public class SocketClient {
+public class SocketClient1 {
 	Socket server;
 
-	public SocketClient() {
+	public SocketClient1() {
 
 	}
 
@@ -77,7 +77,7 @@ public class SocketClient {
 	}
 
 	public static void main(String[] args) {
-		SocketClient client = new SocketClient();
+		SocketClient1 client = new SocketClient1();
 		int port = -1;
 		try {
 			// not safe but try-catch will get it
