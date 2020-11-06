@@ -9,10 +9,10 @@ import java.util.Collections;
 import java.util.List;
 
 //part 2
-public class SocketServer {
+public class SocketServer1 {
 	int port = 3001;
 
-	public SocketServer() {
+	public SocketServer1() {
 	}
 
 	private void start(int port) {
@@ -53,7 +53,7 @@ public class SocketServer {
 
 	public static void main(String[] arg) {
 		System.out.println("Starting Server");
-		SocketServer server = new SocketServer();
+		SocketServer1 server = new SocketServer1();
 		int port = -1;
 		if (arg.length > 0) {
 			try {
