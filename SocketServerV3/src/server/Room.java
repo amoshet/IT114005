@@ -94,7 +94,6 @@ public class Room implements AutoCloseable {
 	 *                triggering the actions)
 	 */
 	private String processCommands(String message, ServerThread client) {
-		// boolean wasCommand = false;
 		String response = null;
 		try {
 			if (message.indexOf(COMMAND_TRIGGER) > -1) {
@@ -113,19 +112,17 @@ public class Room implements AutoCloseable {
 					if (server.createNewRoom(roomName)) {
 						joinRoom(roomName, client);
 					}
-					// wasCommand = true;
 					break;
 				case JOIN_ROOM:
 					roomName = comm2[1];
 					joinRoom(roomName, client);
-					// wasCommand = true;
 					break;
 
 				case "roll": // rolls die
 					String num = Integer.toString((int) ((Math.random() * 6) + 1));
 					response = "⚄ : " + num;
 					break;
-				case "flip": // rols heads or tails
+				case "flip": // rolls heads or tails
 					int ranflip = (int) (Math.random() * 2);
 					if (ranflip == 0) {
 						response = "◌: heads";
@@ -133,11 +130,47 @@ public class Room implements AutoCloseable {
 						response = "◌: tails";
 					}
 					break;
-
+				/*
+				 * case "*": response = message.replaceAll("\\*", "<b>" + message + "</b>");
+				 * break;
+				 */
 				default:
 					// not a command, let's fix this function from eating messages
 					response = message;
 					break;
+				}
+			} else if (message.contains("*")) { // need a way to iterate through them all
+				int start = message.indexOf("*");
+				int end = message.lastIndexOf("*");
+				if (start != end) {
+					String modify = message.substring(start, end);
+					String beforeString = message.substring(0, start);
+					String afterString = message.substring(end, message.length());
+					String bold = beforeString + "<b>" + modify + "</b>" + afterString;
+					response = bold.replaceAll("[^a-zA-Z0-9</>_ ]", "");
+
+					/*
+					 * if (message.contains("_")) { bold = message.substring(start, end); String
+					 * beforeString1 = bold.substring(0, start); String afterString1 =
+					 * bold.substring(end, bold.length()); String bold1 = beforeString1 + "<u>" +
+					 * bold + "</u>" + afterString1; response = bold1.replaceAll("[^a-zA-Z0-9<>*]",
+					 * ""); }
+					 */
+				} else {
+					response = message;
+				}
+
+			} else if (message.contains("_")) {
+				int start = message.indexOf("_");
+				int end = message.lastIndexOf("_");
+				if (start != end) {
+					String modify = message.substring(start, end);
+					String beforeString = message.substring(0, start);
+					String afterString = message.substring(end, message.length());
+					String bold = beforeString + "<u>" + modify + "</u>" + afterString;
+					response = bold.replaceAll("[^a-zA-Z0-9</>* ]", "");
+				} else {
+					response = message;
 				}
 			} else {
 				response = message;
@@ -146,7 +179,6 @@ public class Room implements AutoCloseable {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		// return wasCommand;
 		return response;
 	}
 
