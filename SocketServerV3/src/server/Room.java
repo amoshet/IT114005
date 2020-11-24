@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class Room implements AutoCloseable {
 	private static SocketServer server;// used to refer to accessible server functions
 	private String name;
@@ -139,48 +141,100 @@ public class Room implements AutoCloseable {
 					response = message;
 					break;
 				}
-			} else if (message.contains("*")) { // need a way to iterate through them all
-				int start = message.indexOf("*");
-				int end = message.lastIndexOf("*");
-				if (start != end) {
-					String modify = message.substring(start, end);
-					String beforeString = message.substring(0, start);
-					String afterString = message.substring(end, message.length());
-					String bold = beforeString + "<b>" + modify + "</b>" + afterString;
-					response = bold.replaceAll("[^a-zA-Z0-9</>_ ]", "");
-
-					/*
-					 * if (message.contains("_")) { bold = message.substring(start, end); String
-					 * beforeString1 = bold.substring(0, start); String afterString1 =
-					 * bold.substring(end, bold.length()); String bold1 = beforeString1 + "<u>" +
-					 * bold + "</u>" + afterString1; response = bold1.replaceAll("[^a-zA-Z0-9<>*]",
-					 * ""); }
-					 */
-				} else {
-					response = message;
-				}
-
-			} else if (message.contains("_")) {
-				int start = message.indexOf("_");
-				int end = message.lastIndexOf("_");
-				if (start != end) {
-					String modify = message.substring(start, end);
-					String beforeString = message.substring(0, start);
-					String afterString = message.substring(end, message.length());
-					String bold = beforeString + "<u>" + modify + "</u>" + afterString;
-					response = bold.replaceAll("[^a-zA-Z0-9</>* ]", "");
-				} else {
-					response = message;
-				}
 			} else {
-				response = message;
-			}
+				String nMess = message;
 
+				if (StringUtils.countMatches(nMess, "*") > 1) { // bold
+					String[] s = nMess.split("\\*");
+					String m = "";
+					m += s[0];
+					for (int i = 1; i < s.length; i++) {
+						if (i % 2 == 0) {
+							m += s[i];
+						} else {
+							m += "<b>" + s[i] + "</b>";
+						}
+						System.out.println(s[i]);
+					}
+					nMess = m;
+				}
+
+				if (StringUtils.countMatches(nMess, "_") > 1) { // underline
+					String[] s = nMess.split("\\_");
+					String m = "";
+					m += s[0];
+					for (int i = 1; i < s.length; i++) {
+						if (i % 2 == 0) {
+							m += s[i];
+						} else {
+							m += "<u>" + s[i] + "</u>";
+						}
+						System.out.println(s[i]);
+					}
+					nMess = m;
+				}
+
+				if (StringUtils.countMatches(nMess, "~") > 1) { // italics
+					String[] s = nMess.split("\\~");
+					String m = "";
+					m += s[0];
+					for (int i = 1; i < s.length; i++) {
+						if (i % 2 == 0) {
+							m += s[i];
+						} else {
+							m += "<i>" + s[i] + "</i>";
+						}
+						System.out.println(s[i]);
+					}
+					nMess = m;
+				}
+
+				if (StringUtils.countMatches(nMess, "#") > 1) { // italics
+					String[] s = nMess.split("\\#");
+					String m = "";
+					m += s[0];
+					for (int i = 1; i < s.length; i++) {
+						if (i % 2 == 0) {
+							m += s[i];
+						} else {
+							m += "<font color=red>" + s[i] + "</font>";
+						}
+						System.out.println(s[i]);
+					}
+					nMess = m;
+				}
+
+				response = nMess;
+
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		// return wasCommand;
 		return response;
 	}
+
+	/*
+	 * else if (message.substring(0) != "/") { String txt[] = message.split(" ");
+	 * String nMess = ""; // if (message.contains("*") && message.indexOf("*") != //
+	 * message.lastIndexOf("*")) { int s1 = ArrayUtils.indexOf(txt, "*"); int e1 =
+	 * ArrayUtils.lastIndexOf(txt, "*"); int[] bold = new int[2]; int[] und = new
+	 * int[2]; int[] ital = new int[2]; int[] color = new int[2];
+	 * 
+	 * 
+	 * for(int i = 0; i < txt.length; i++) { String w = txt[i]; if (w.indexOf("*") >
+	 * 0 && w.lastIndexOf() ) {
+	 * 
+	 * } }
+	 * 
+	 * for (int i = 0; i < txt.length; i++) { String w = txt[i]; if (i >= s1 && i <=
+	 * e1) { nMess += "<b>" + w + "</b>"; } else { nMess += w; }
+	 * 
+	 * } response = nMess;
+	 * 
+	 * }
+	 */
+//TODO this where exception and else used to be 
 
 	// TODO changed from string to ServerThread
 	protected void sendConnectionStatus(ServerThread client, boolean isConnect, String message) {
