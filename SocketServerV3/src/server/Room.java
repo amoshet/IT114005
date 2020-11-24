@@ -122,20 +122,17 @@ public class Room implements AutoCloseable {
 
 				case "roll": // rolls die
 					String num = Integer.toString((int) ((Math.random() * 6) + 1));
-					response = "⚄ : " + num;
+					response = "<font color =blue> ⚄ : " + num + "</font>";
 					break;
 				case "flip": // rolls heads or tails
 					int ranflip = (int) (Math.random() * 2);
 					if (ranflip == 0) {
-						response = "◌: heads";
+						response = "<font color = blue> ◌: heads </font>";
 					} else {
-						response = "◌: tails";
+						response = "<font color = blue> ◌: tails </font>";
 					}
 					break;
-				/*
-				 * case "*": response = message.replaceAll("\\*", "<b>" + message + "</b>");
-				 * break;
-				 */
+
 				default:
 					// not a command, let's fix this function from eating messages
 					response = message;
@@ -189,7 +186,7 @@ public class Room implements AutoCloseable {
 					nMess = m;
 				}
 
-				if (StringUtils.countMatches(nMess, "#") > 1) { // italics
+				if (StringUtils.countMatches(nMess, "#") > 1) { // changes font to red
 					String[] s = nMess.split("\\#");
 					String m = "";
 					m += s[0];
@@ -213,28 +210,6 @@ public class Room implements AutoCloseable {
 		// return wasCommand;
 		return response;
 	}
-
-	/*
-	 * else if (message.substring(0) != "/") { String txt[] = message.split(" ");
-	 * String nMess = ""; // if (message.contains("*") && message.indexOf("*") != //
-	 * message.lastIndexOf("*")) { int s1 = ArrayUtils.indexOf(txt, "*"); int e1 =
-	 * ArrayUtils.lastIndexOf(txt, "*"); int[] bold = new int[2]; int[] und = new
-	 * int[2]; int[] ital = new int[2]; int[] color = new int[2];
-	 * 
-	 * 
-	 * for(int i = 0; i < txt.length; i++) { String w = txt[i]; if (w.indexOf("*") >
-	 * 0 && w.lastIndexOf() ) {
-	 * 
-	 * } }
-	 * 
-	 * for (int i = 0; i < txt.length; i++) { String w = txt[i]; if (i >= s1 && i <=
-	 * e1) { nMess += "<b>" + w + "</b>"; } else { nMess += w; }
-	 * 
-	 * } response = nMess;
-	 * 
-	 * }
-	 */
-//TODO this where exception and else used to be 
 
 	// TODO changed from string to ServerThread
 	protected void sendConnectionStatus(ServerThread client, boolean isConnect, String message) {
