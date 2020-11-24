@@ -87,6 +87,14 @@ public class ClientUI extends JFrame implements Event {
 			}
 
 		});
+		
+		panel.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "sendAction");
+		panel.getActionMap().put("sendAction", new AbstractAction() {
+			public void actionPerformed(ActionEvent actionEvent) {
+				button.doClick();
+			}
+		});
+		
 		panel.add(button);
 		this.add(panel);
 	}
@@ -111,6 +119,14 @@ public class ClientUI extends JFrame implements Event {
 			}
 
 		});
+		
+		username.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "sendAction");
+		username.getActionMap().put("sendAction", new AbstractAction() {
+			public void actionPerformed(ActionEvent actionEvent) {
+				button.doClick();
+			}
+		});
+		
 		panel.add(button);
 		this.add(panel);
 	}
