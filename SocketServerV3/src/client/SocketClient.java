@@ -27,7 +27,7 @@ public enum SocketClient {
 	private final static Logger log = Logger.getLogger(SocketClient.class.getName());
 	private static List<Event> events = new ArrayList<Event>();// change from event to list<event>
 
-	private static Payload buildMessage(String message) {
+	private Payload buildMessage(String message) {
 		Payload payload = new Payload();
 		payload.setPayloadType(PayloadType.MESSAGE);
 		payload.setClientName(clientName);
@@ -35,7 +35,7 @@ public enum SocketClient {
 		return payload;
 	}
 
-	private static Payload buildConnectionStatus(String name, boolean isConnect) {
+	private Payload buildConnectionStatus(String name, boolean isConnect) {
 		Payload payload = new Payload();
 		if (isConnect) {
 			payload.setPayloadType(PayloadType.CONNECT);
@@ -46,7 +46,7 @@ public enum SocketClient {
 		return payload;
 	}
 
-	private static void sendPayload(Payload p) {
+	private void sendPayload(Payload p) {
 		try {
 			out.writeObject(p);
 		} catch (IOException e) {
@@ -55,7 +55,7 @@ public enum SocketClient {
 		}
 	}
 
-	private static void listenForServerMessage(ObjectInputStream in) {
+	private void listenForServerMessage(ObjectInputStream in) {
 		if (fromServerThread != null) {
 			log.log(Level.INFO, "Server Listener is likely already running");
 			return;
@@ -164,14 +164,14 @@ public enum SocketClient {
 		events.remove(e);
 	}
 
-	public static boolean connectAndStart(String address, String port) throws IOException {
+	public boolean connectAndStart(String address, String port) throws IOException {
 		if (connect(address, port)) {
 			return start();
 		}
 		return false;
 	}
 
-	public static boolean connect(String address, String port) {
+	public boolean connect(String address, String port) {
 		try {
 			server = new Socket(address, Integer.parseInt(port));
 			log.log(Level.INFO, "Client connected");
@@ -184,12 +184,12 @@ public enum SocketClient {
 		return false;
 	}
 
-	public static void setUsername(String username) {
+	public void setUsername(String username) {
 		clientName = username;
 		sendPayload(buildConnectionStatus(clientName, true));
 	}
 
-	public static void sendMessage(String message) {
+	public void sendMessage(String message) {
 		sendPayload(buildMessage(message));
 	}
 
@@ -214,7 +214,7 @@ public enum SocketClient {
 		sendPayload(p);
 	}
 
-	public static boolean start() throws IOException {
+	public boolean start() throws IOException {
 		if (server == null) {
 			log.log(Level.WARNING, "Server is null");
 			return false;
@@ -258,7 +258,7 @@ public enum SocketClient {
 		return true;
 	}
 
-	public static void close() {
+	public void close() {
 		if (server != null && !server.isClosed()) {
 			try {
 				server.close();

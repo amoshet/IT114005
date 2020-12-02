@@ -140,7 +140,7 @@ public class ClientUI extends JFrame implements Event {
 			public void actionPerformed(ActionEvent e) {
 				String name = username.getText();
 				if (name != null && name.length() > 0) {
-					SocketClient.setUsername(name);
+					SocketClient.INSTANCE.setUsername(name);
 					self.next();
 				}
 			}
@@ -187,7 +187,7 @@ public class ClientUI extends JFrame implements Event {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (text.getText().length() > 0) {
-					SocketClient.sendMessage(text.getText());
+					SocketClient.INSTANCE.sendMessage(text.getText());
 					text.setText("");
 				}
 			}
@@ -300,8 +300,8 @@ public class ClientUI extends JFrame implements Event {
 	}
 
 	void connect(String host, String port) throws IOException {
-		SocketClient.callbackListener(this);
-		SocketClient.connectAndStart(host, port);
+		SocketClient.INSTANCE.registerCallbackListener(this);
+		SocketClient.INSTANCE.connectAndStart(host, port);
 	}
 
 	void showUI() {
