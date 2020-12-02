@@ -5,6 +5,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,14 +15,17 @@ import server.Payload;
 import server.PayloadType;
 
 //part 7
-public class SocketClient {
+public enum SocketClient {
+	INSTANCE; // see https://dzone.com/articles/java-singletons-using-enum "Making Singletons
+	// with Enum"
+
 	private static Socket server;
 	private static Thread fromServerThread;
 	private static Thread clientThread;
 	private static String clientName;
 	private static ObjectOutputStream out;
 	private final static Logger log = Logger.getLogger(SocketClient.class.getName());
-	private static Event event;
+	private static List<Event> events = new ArrayList<Event>();// change from event to list<event>
 
 	private static Payload buildMessage(String message) {
 		Payload payload = new Payload();
@@ -80,33 +86,66 @@ public class SocketClient {
 		fromServerThread.start();// start the thread
 	}
 
+	private void sendRoom(String roomName) {
+		Iterator<Event> iter = events.iterator();
+		while (iter.hasNext()) {
+			Event e = iter.next();
+			if (e != null) {
+				e.onGetRoom(roomName);
+			}
+		}
+	}
+
+	private void sendOnClientConnect(String name, String message) {
+		Iterator<Event> iter = events.iterator();
+		while (iter.hasNext()) {
+			Event e = iter.next();
+			if (e != null) {
+				e.onClientConnect(name, message);
+			}
+		}
+	}
+
+	private void sendOnClientDisconnect(String name, String message) {
+		Iterator<Event> iter = events.iterator();
+		while (iter.hasNext()) {
+			Event e = iter.next();
+			if (e != null) {
+				e.onClientDisconnect(name, message);
+			}
+		}
+	}
+
+	private void sendOnMessage(String name, String message) {
+		Iterator<Event> iter = events.iterator();
+		while (iter.hasNext()) {
+			Event e = iter.next();
+			if (e != null) {
+				e.onMessageReceive(name, message);
+			}
+		}
+	}
+
 	/***
 	 * Determine any special logic for different PayloadTypes
 	 * 
 	 * @param p
 	 */
-	private static void processPayload(Payload p) {
+	private void processPayload(Payload p) {
 
 		switch (p.getPayloadType()) {
 		case CONNECT:
-			if (event != null) {
-				event.onClientConnect(p.getClientName(), p.getMessage());
-			}
+			sendOnClientConnect(p.getClientName(), p.getMessage());
 			break;
 		case DISCONNECT:
-			if (event != null) {
-				event.onClientDisconnect(p.getClientName(), p.getMessage());
-			}
+			sendOnClientDisconnect(p.getClientName(), p.getMessage());
 			break;
 		case MESSAGE:
-			if (event != null) {
-				event.onMessageReceive(p.getClientName(), p.getMessage());
-			}
+			sendOnMessage(p.getClientName(), p.getMessage());
 			break;
-		case CLEAR_PLAYERS:
-			if (event != null) {
-				event.onChangeRoom();
-			}
+		case GET_ROOMS:
+			// reply from ServerThread
+			sendRoom(p.getMessage());
 			break;
 		default:
 			log.log(Level.WARNING, "unhandled payload on client" + p);
@@ -116,9 +155,13 @@ public class SocketClient {
 	}
 
 	// TODO Start public methods here
-	public static void callbackListener(Event e) {
-		event = e;
+	public void registerCallbackListener(Event e) {
+		events.add(e);
 		log.log(Level.INFO, "Attached listener");
+	}
+
+	public void removeCallbackListener(Event e) {
+		events.remove(e);
 	}
 
 	public static boolean connectAndStart(String address, String port) throws IOException {
@@ -148,6 +191,27 @@ public class SocketClient {
 
 	public static void sendMessage(String message) {
 		sendPayload(buildMessage(message));
+	}
+
+	public void sendCreateRoom(String room) {
+		Payload p = new Payload();
+		p.setPayloadType(PayloadType.CREATE_ROOM);
+		p.setMessage(room);
+		sendPayload(p);
+	}
+
+	public void sendJoinRoom(String room) {
+		Payload p = new Payload();
+		p.setPayloadType(PayloadType.JOIN_ROOM);
+		p.setMessage(room);
+		sendPayload(p);
+	}
+
+	public void sendGetRooms(String query) {
+		Payload p = new Payload();
+		p.setPayloadType(PayloadType.GET_ROOMS);
+		p.setMessage(query);
+		sendPayload(p);
 	}
 
 	public static boolean start() throws IOException {

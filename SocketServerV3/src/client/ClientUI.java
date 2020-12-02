@@ -21,6 +21,9 @@ import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
@@ -40,10 +43,30 @@ public class ClientUI extends JFrame implements Event {
 	List<User> users = new ArrayList<User>();
 	private final static Logger log = Logger.getLogger(ClientUI.class.getName());
 	Dimension windowSize = new Dimension(400, 400);
+	String username;
+	RoomsPanel roomsPanel;
+	JMenuBar menu;
 
 	public ClientUI(String title) {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		menu = new JMenuBar();
+		JMenu roomsMenu = new JMenu("Rooms");
+		JMenuItem roomsSearch = new JMenuItem("Search");
+		roomsSearch.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("clicked");
+				goToPanel("rooms");
+			}
+
+		});
+
+		roomsMenu.add(roomsSearch);
+		menu.add(roomsMenu);
+		windowSize.width *= .8;
+		windowSize.height *= .8;
 		setPreferredSize(windowSize);
+		setSize(windowSize);// This is needed for setLocationRelativeTo()
 		setLocationRelativeTo(null);
 		self = this;
 		setTitle(title);
@@ -51,8 +74,12 @@ public class ClientUI extends JFrame implements Event {
 		setLayout(card);
 		createConnectionScreen();
 		createUserInputScreen();
+
 		createPanelRoom();
 		createPanelUserList();
+		this.setJMenuBar(menu);
+		// TODO remove
+		createRoomsPanel();
 		showUI();
 	}
 
@@ -87,16 +114,16 @@ public class ClientUI extends JFrame implements Event {
 			}
 
 		});
-		
+
 		panel.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "sendAction");
 		panel.getActionMap().put("sendAction", new AbstractAction() {
 			public void actionPerformed(ActionEvent actionEvent) {
 				button.doClick();
 			}
 		});
-		
+
 		panel.add(button);
-		this.add(panel);
+		this.add(panel, "login");
 	}
 
 	void createUserInputScreen() {
@@ -119,16 +146,16 @@ public class ClientUI extends JFrame implements Event {
 			}
 
 		});
-		
+
 		username.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "sendAction");
 		username.getActionMap().put("sendAction", new AbstractAction() {
 			public void actionPerformed(ActionEvent actionEvent) {
 				button.doClick();
 			}
 		});
-		
+
 		panel.add(button);
-		this.add(panel);
+		this.add(panel, "details");
 	}
 
 	void createPanelRoom() {
@@ -168,7 +195,7 @@ public class ClientUI extends JFrame implements Event {
 		});
 		input.add(button);
 		panel.add(input, BorderLayout.SOUTH);
-		this.add(panel);
+		this.add(panel, "lobby");
 	}
 
 	void createPanelUserList() {
@@ -184,6 +211,11 @@ public class ClientUI extends JFrame implements Event {
 		scroll.setPreferredSize(d);
 
 		textArea.getParent().getParent().getParent().add(scroll, BorderLayout.EAST);
+	}
+
+	void createRoomsPanel() {
+		roomsPanel = new RoomsPanel(this);
+		this.add(roomsPanel, "rooms");
 	}
 
 	void addClient(String name) {
@@ -253,6 +285,20 @@ public class ClientUI extends JFrame implements Event {
 		card.previous(this.getContentPane());
 	}
 
+	void goToPanel(String panel) {
+		switch (panel) {
+		case "rooms":
+			// TODO get rooms
+			roomsPanel.removeAllRooms();
+			SocketClient.INSTANCE.sendGetRooms(null);
+			break;
+		default:
+			// no need to react
+			break;
+		}
+		card.show(this.getContentPane(), panel);
+	}
+
 	void connect(String host, String port) throws IOException {
 		SocketClient.callbackListener(this);
 		SocketClient.connectAndStart(host, port);
@@ -306,12 +352,23 @@ public class ClientUI extends JFrame implements Event {
 			removeClient(u);
 			iter.remove();
 		}
+		goToPanel("lobby");
 	}
 
 	public static void main(String[] args) {
-		ClientUI ui = new ClientUI("My UI");
+		// String n = client.getClientName();
+		ClientUI ui = new ClientUI("AOM Messenger"); // every variable i put here for name fails
 		if (ui != null) {
 			log.log(Level.FINE, "Started");
+		}
+	}
+
+	@Override
+	public void onGetRoom(String roomName) {
+		// TODO Auto-generated method stub
+		if (roomsPanel != null) {
+			roomsPanel.addRoom(roomName);
+			pack();
 		}
 	}
 }

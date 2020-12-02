@@ -132,6 +132,53 @@ public class Room implements AutoCloseable {
 						response = "<font color = blue> ◌: tails </font>";
 					}
 					break;
+				case "pm":
+					response = null;
+					String[] pm = message.split("@"); // last split will be @lastusername + message
+					int size = pm.length;
+					List<String> users = new ArrayList<String>();
+					String nStr = pm[size - 1]; // should be last username + message
+					String[] nMess = nStr.split(" ", 2);
+					String m1 = nMess[1]; // this is our message to be sent to the target user
+
+					for (int i = 1; i < size - 1; i++) {
+						users.add(pm[i].trim());
+						System.out.println(pm[i].trim());
+					}
+					users.add(nMess[0]);
+					sendPrivateMessage(client, m1, users);
+					/*
+					 * String[] users = new String[count + 1];
+					 * 
+					 * String nT = ""; nT += pm[0]; if (count > 1) { for (int i = 1; i < count; i++)
+					 * { users[i] = pm[i]; nT += users[i]; } response = nT; } else { users[0] =
+					 * pm[0]; // ServerThread pmClient = new ServerThread(, roomName); //
+					 * pmClient.send(client.getClientName(), message); response = users[1]; //// now
+					 * config to send message only to one user }
+					 */
+					break;
+				case "mute": // any message from client will not be sent to target
+								// if i just add or remove them from a send list, then they will be muted by all
+								// i think the clientname.equals(sender) check takes care of this though
+					response = null;
+					String[] pm1 = message.split("@"); // last split will be @lastusername + message
+					int size1 = pm1.length;
+					List<String> users1 = new ArrayList<String>();
+					String nStr1 = pm1[size1 - 1]; // should be last username + message
+					String[] nMess1 = nStr1.split(" ", 2);
+					String m2 = nMess1[1]; // this is our message to be sent to the target user
+
+					for (int i = 1; i < size1 - 1; i++) { // compiles all users except last one
+						users1.add(pm1[i].trim());
+						System.out.println(pm1[i].trim());
+					}
+					users1.add(nMess1[0]); // adds last user to user list
+
+					break;
+				case "unmute":
+					String[] un = message.split("@");
+
+					break;
 
 				default:
 					// not a command, let's fix this function from eating messages
@@ -254,6 +301,25 @@ public class Room implements AutoCloseable {
 				log.log(Level.INFO, "Removed client " + client.getId());
 			}
 		}
+	}
+
+	protected void sendPrivateMessage(ServerThread sender, String message, List<String> users) {
+		Iterator<ServerThread> iter = clients.iterator();
+		while (iter.hasNext()) {
+			ServerThread client = iter.next();
+			if (users.contains(client.getClientName()) || client.getClientName().equals(sender.getClientName())) {
+				boolean messageSent = client.send(sender.getClientName(), message);
+				if (!messageSent) {
+					iter.remove();
+					log.log(Level.INFO, "Removed client " + client.getId());
+				}
+			}
+		}
+
+	}
+
+	public List<String> getRooms() {
+		return server.getRooms();
 	}
 
 	/***
