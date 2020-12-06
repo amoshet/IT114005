@@ -17,6 +17,7 @@ public class User extends JPanel {
 		this.add(nameField);
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}

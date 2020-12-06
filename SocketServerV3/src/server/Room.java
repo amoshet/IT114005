@@ -39,14 +39,14 @@ public class Room implements AutoCloseable {
 		} else {
 			clients.add(client);
 			if (client.getClientName() != null) {
-				client.sendClearList();
+				// removed client.sendClearlist
 				sendConnectionStatus(client, true, "joined the room " + getName());
 				updateClientList(client);
 			}
 		}
 	}
 
-	private void updateClientList(ServerThread client) {
+	private synchronized void updateClientList(ServerThread client) {
 		Iterator<ServerThread> iter = clients.iterator();
 		while (iter.hasNext()) {
 			ServerThread c = iter.next();
@@ -57,13 +57,25 @@ public class Room implements AutoCloseable {
 	}
 
 	protected synchronized void removeClient(ServerThread client) {
-		clients.remove(client);
+		Iterator<ServerThread> iter = clients.iterator();
+		while (iter.hasNext()) {
+			ServerThread c = iter.next();
+			if (c == client) {
+				iter.remove();
+				log.log(Level.INFO, "Removed client " + c.getClientName() + " from " + getName());
+			}
+		}
 		if (clients.size() > 0) {
-			// sendMessage(client, "left the room");
 			sendConnectionStatus(client, false, "left the room " + getName());
 		} else {
 			cleanupEmptyRoom();
 		}
+
+		/*
+		 * clients.remove(client); if (clients.size() > 0) { // sendMessage(client,
+		 * "left the room"); sendConnectionStatus(client, false, "left the room " +
+		 * getName()); } else { cleanupEmptyRoom(); }
+		 */
 	}
 
 	private void cleanupEmptyRoom() {
@@ -86,6 +98,13 @@ public class Room implements AutoCloseable {
 
 	protected void joinLobby(ServerThread client) {
 		server.joinLobby(client);
+	}
+
+	protected void createRoom(String room, ServerThread client) {
+		if (server.createNewRoom(room)) {
+			sendMessage(client, "Created a new room");
+			joinRoom(room, client);
+		}
 	}
 
 	/***
@@ -143,41 +162,35 @@ public class Room implements AutoCloseable {
 
 					for (int i = 1; i < size - 1; i++) {
 						users.add(pm[i].trim());
-						System.out.println(pm[i].trim());
 					}
 					users.add(nMess[0]);
 					sendPrivateMessage(client, m1, users);
-					/*
-					 * String[] users = new String[count + 1];
-					 * 
-					 * String nT = ""; nT += pm[0]; if (count > 1) { for (int i = 1; i < count; i++)
-					 * { users[i] = pm[i]; nT += users[i]; } response = nT; } else { users[0] =
-					 * pm[0]; // ServerThread pmClient = new ServerThread(, roomName); //
-					 * pmClient.send(client.getClientName(), message); response = users[1]; //// now
-					 * config to send message only to one user }
-					 */
 					break;
-				case "mute": // any message from client will not be sent to target
-								// if i just add or remove them from a send list, then they will be muted by all
-								// i think the clientname.equals(sender) check takes care of this though
+				case "mute": // get this specific user to add or remove to mute list
 					response = null;
-					String[] pm1 = message.split("@"); // last split will be @lastusername + message
-					int size1 = pm1.length;
-					List<String> users1 = new ArrayList<String>();
-					String nStr1 = pm1[size1 - 1]; // should be last username + message
-					String[] nMess1 = nStr1.split(" ", 2);
-					String m2 = nMess1[1]; // this is our message to be sent to the target user
+					String[] mu = message.split("@"); // last split will be @lastusername + message
+					int mSize = mu.length;
+					List<String> usersM = new ArrayList<String>();
+					String nStrM = mu[mSize - 1]; // should be last username + message
+					String[] nMessM = nStrM.split(" ", 2);
 
-					for (int i = 1; i < size1 - 1; i++) { // compiles all users except last one
-						users1.add(pm1[i].trim());
-						System.out.println(pm1[i].trim());
+					for (int i = 1; i < mSize - 1; i++) {
+						usersM.add(mu[i].trim());
 					}
-					users1.add(nMess1[0]); // adds last user to user list
-
+					usersM.add(nMessM[0]); // TODO now add these users to the clients mute lsit
 					break;
 				case "unmute":
-					String[] un = message.split("@");
+					response = null;
+					String[] un = message.split("@"); // last split will be @lastusername + message
+					int unSize = un.length;
+					List<String> usersUn = new ArrayList<String>();
+					String nStrUn = un[unSize - 1]; // should be last username + message
+					String[] nMessUn = nStrUn.split(" ", 2);
 
+					for (int i = 1; i < unSize - 1; i++) {
+						usersUn.add(un[i].trim());
+					}
+					usersUn.add(nMessUn[0]); // TODO now remove these users from the clients mute list
 					break;
 
 				default:
@@ -292,15 +305,19 @@ public class Room implements AutoCloseable {
 		 * if (processCommands(message, sender)) { // it was a command, don't broadcast
 		 * return; }
 		 */
+
 		Iterator<ServerThread> iter = clients.iterator();
 		while (iter.hasNext()) {
 			ServerThread client = iter.next();
-			boolean messageSent = client.send(sender.getClientName(), message);
-			if (!messageSent) {
-				iter.remove();
-				log.log(Level.INFO, "Removed client " + client.getId());
+			if (!client.isMuted(sender.getClientName())) {
+				boolean messageSent = client.send(sender.getClientName(), message);
+				if (!messageSent) {
+					iter.remove();
+					log.log(Level.INFO, "Removed client " + client.getId());
+				}
 			}
 		}
+
 	}
 
 	protected void sendPrivateMessage(ServerThread sender, String message, List<String> users) {
@@ -318,8 +335,8 @@ public class Room implements AutoCloseable {
 
 	}
 
-	public List<String> getRooms() {
-		return server.getRooms();
+	public List<String> getRooms(String search) {
+		return server.getRooms(search);
 	}
 
 	/***

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -17,6 +18,11 @@ public class ServerThread extends Thread {
 	private Room currentRoom;// what room we are in, should be lobby by default
 	private String clientName;
 	private final static Logger log = Logger.getLogger(ServerThread.class.getName());
+	List<String> mutedClients = new ArrayList<String>();
+
+	public boolean isMuted(String clientName) {
+		return mutedClients.contains(clientName);
+	}
 
 	public String getClientName() {
 		return clientName;
@@ -91,11 +97,7 @@ public class ServerThread extends Thread {
 		return sendPayload(payload);
 	}
 
-	protected boolean sendClearList() {
-		Payload payload = new Payload();
-		payload.setPayloadType(PayloadType.CLEAR_PLAYERS);
-		return sendPayload(payload);
-	}
+//deleted clear list because it had clear players
 
 	protected boolean sendRoom(String room) {
 		Payload payload = new Payload();
@@ -141,13 +143,9 @@ public class ServerThread extends Thread {
 		case MESSAGE:
 			currentRoom.sendMessage(this, p.getMessage());
 			break;
-		case CLEAR_PLAYERS:
-			// we currently don't need to do anything since the UI/Client won't be sending
-			// this
-			break;
 		case GET_ROOMS:
 			// far from efficient but it works for example sake
-			List<String> roomNames = currentRoom.getRooms();
+			List<String> roomNames = currentRoom.getRooms(p.getMessage());
 			Iterator<String> iter = roomNames.iterator();
 			while (iter.hasNext()) {
 				String room = iter.next();
@@ -158,6 +156,9 @@ public class ServerThread extends Thread {
 					}
 				}
 			}
+			break;
+		case CREATE_ROOM:
+			currentRoom.createRoom(p.getMessage(), this);
 			break;
 		case JOIN_ROOM:
 			currentRoom.joinRoom(p.getMessage(), this);

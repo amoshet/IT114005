@@ -30,6 +30,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.WindowConstants;
 
 public class ClientUI extends JFrame implements Event {
 	/**
@@ -48,7 +49,7 @@ public class ClientUI extends JFrame implements Event {
 	JMenuBar menu;
 
 	public ClientUI(String title) {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		menu = new JMenuBar();
 		JMenu roomsMenu = new JMenu("Rooms");
 		JMenuItem roomsSearch = new JMenuItem("Search");
@@ -117,6 +118,7 @@ public class ClientUI extends JFrame implements Event {
 
 		panel.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "sendAction");
 		panel.getActionMap().put("sendAction", new AbstractAction() {
+			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
 				button.doClick();
 			}
@@ -134,6 +136,7 @@ public class ClientUI extends JFrame implements Event {
 		panel.add(userLabel);
 		panel.add(username);
 		JButton button = new JButton("Join");
+		ClientUI self = this;
 		button.addActionListener(new ActionListener() {
 
 			@Override
@@ -141,6 +144,9 @@ public class ClientUI extends JFrame implements Event {
 				String name = username.getText();
 				if (name != null && name.length() > 0) {
 					SocketClient.INSTANCE.setUsername(name);
+					self.username = name;
+
+					self.setTitle(self.getTitle() + " - " + self.username);
 					self.next();
 				}
 			}
@@ -149,6 +155,7 @@ public class ClientUI extends JFrame implements Event {
 
 		username.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "sendAction");
 		username.getActionMap().put("sendAction", new AbstractAction() {
+			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
 				button.doClick();
 			}
@@ -177,6 +184,7 @@ public class ClientUI extends JFrame implements Event {
 		JButton button = new JButton("Send");
 		text.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "sendAction");
 		text.getActionMap().put("sendAction", new AbstractAction() {
+			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
 				button.doClick();
 			}
