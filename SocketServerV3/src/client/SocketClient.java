@@ -116,6 +116,16 @@ public enum SocketClient {
 		}
 	}
 
+	private void sendOnChangeRoom() {
+		Iterator<Event> iter = events.iterator();
+		while (iter.hasNext()) {
+			Event e = iter.next();
+			if (e != null) {
+				e.onChangeRoom();
+			}
+		}
+	}
+
 	private void sendOnMessage(String name, String message) {
 		Iterator<Event> iter = events.iterator();
 		while (iter.hasNext()) {
@@ -142,6 +152,9 @@ public enum SocketClient {
 			break;
 		case MESSAGE:
 			sendOnMessage(p.getClientName(), p.getMessage());
+			break;
+		case CLEAR_USERS:
+			sendOnChangeRoom();
 			break;
 		case GET_ROOMS:
 			// reply from ServerThread
