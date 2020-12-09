@@ -1,4 +1,3 @@
-//Ahmed Moshet Basic HW
 
 public class Homework {
 	public static void main(String[] args) {
