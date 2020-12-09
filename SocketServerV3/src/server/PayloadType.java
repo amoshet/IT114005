@@ -1,0 +1,5 @@
+package server;
+
+public enum PayloadType {
+	CONNECT, DISCONNECT, MESSAGE, CLEAR_USERS, CREATE_ROOM, JOIN_ROOM, GET_ROOMS
+}
