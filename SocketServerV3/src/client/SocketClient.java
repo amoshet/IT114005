@@ -96,6 +96,16 @@ public enum SocketClient {
 		}
 	}
 
+	private void sendMute(String clientName, boolean isMuted) {
+		Iterator<Event> iter = events.iterator();
+		while (iter.hasNext()) {
+			Event e = iter.next();
+			if (e != null) {
+				e.onMute(clientName, isMuted);
+			}
+		}
+	}
+
 	private void sendOnClientConnect(String name, String message) {
 		Iterator<Event> iter = events.iterator();
 		while (iter.hasNext()) {
@@ -159,6 +169,10 @@ public enum SocketClient {
 		case GET_ROOMS:
 			// reply from ServerThread
 			sendRoom(p.getMessage());
+			break;
+		case IS_MUTED:
+			boolean isMuted = p.getNumber() == 1;
+			sendMute(p.getClientName(), isMuted);
 			break;
 		default:
 			log.log(Level.WARNING, "unhandled payload on client" + p);

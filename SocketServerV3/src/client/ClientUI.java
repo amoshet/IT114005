@@ -379,4 +379,18 @@ public class ClientUI extends JFrame implements Event {
 			pack();
 		}
 	}
+
+	@Override
+	public void onMute(String clientName, boolean isMuted) {
+		// TODO Auto-generated method stub
+		Iterator<User> iter = users.iterator();
+		while (iter.hasNext()) {
+			User u = iter.next();
+			if (u.getName() == clientName) {
+				// TODO implement greying of user name on user list
+				// TODO implement sending message to let user know he is muted
+				break;
+			}
+		}
+	}
 }

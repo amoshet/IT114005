@@ -178,12 +178,15 @@ public class Room implements AutoCloseable {
 						usersM.add(mu[i].trim());
 					}
 					usersM.add(nMessM[0]); // user list is now complete
+
 					// adds client to sender mute list
 					for (int i = 0; i < usersM.size(); i++) {
 						System.out.println(usersM.get(i));
 						if (!client.mutedClients.contains(usersM.get(i))) {
 							client.mutedClients.add(usersM.get(i));
+							client.sendMuteStatus(usersM.get(i), true);
 						}
+						sendPrivateMessage(client, "You have been muted", usersM);
 					}
 
 					break;
@@ -204,6 +207,7 @@ public class Room implements AutoCloseable {
 					for (int i = 0; i < usersUn.size(); i++) {
 						if (client.mutedClients.contains(usersUn.get(i))) {
 							client.mutedClients.remove(usersUn.get(i));
+							client.sendMuteStatus(usersUn.get(i), false);
 						}
 					}
 					break;

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for Project SocketServerV3 with libraries in sub-folder">
+    <!--this file was created by Eclipse Runnable JAR Export Wizard-->
+    <!--ANT 1.7 is required                                        -->
+    <!--define folder properties-->
+    <property name="dir.buildfile" value="."/>
+    <property name="dir.workspace" value="${dir.buildfile}/../.."/>
+    <property name="dir.jarfile" value="${dir.buildfile}"/>
+    <target name="create_run_jar">
+        <jar destfile="${dir.jarfile}/Client.jar">
+            <manifest>
+                <attribute name="Main-Class" value="client.ClientUI"/>
+                <attribute name="Class-Path" value=". Client_lib/commons-lang3-3.11.jar Client_lib/commons-lang3-3.11-javadoc.jar Client_lib/commons-lang3-3.11-sources.jar"/>
+            </manifest>
+            <fileset dir="${dir.workspace}/SocketServerV3/bin"/>
+        </jar>
+        <delete dir="${dir.jarfile}/Client_lib"/>
+        <mkdir dir="${dir.jarfile}/Client_lib"/>
+        <copy file="C:/Users/amosh/Documents/IT 114/commons-lang3-3.11/commons-lang3-3.11.jar" todir="${dir.jarfile}/Client_lib"/>
+        <copy file="C:/Users/amosh/Documents/IT 114/commons-lang3-3.11/commons-lang3-3.11-javadoc.jar" todir="${dir.jarfile}/Client_lib"/>
+        <copy file="C:/Users/amosh/Documents/IT 114/commons-lang3-3.11/commons-lang3-3.11-sources.jar" todir="${dir.jarfile}/Client_lib"/>
+    </target>
+</project>

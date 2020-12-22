@@ -113,6 +113,16 @@ public class ServerThread extends Thread {
 		return sendPayload(payload);
 	}
 
+	protected boolean sendMuteStatus(String clientName, boolean isMuted) {
+		Payload payload = new Payload();
+		// using same payload type as a response trigger
+
+		payload.setPayloadType(PayloadType.IS_MUTED);
+		payload.setClientName(clientName);
+		payload.setNumber(isMuted ? 1 : 0);
+		return sendPayload(payload);
+	}
+
 	private boolean sendPayload(Payload p) {
 		try {
 			out.writeObject(p);
